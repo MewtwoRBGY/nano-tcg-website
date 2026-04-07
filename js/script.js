@@ -1,24 +1,23 @@
-// Load JSON + render cards
+let allCards = [];
+
+/* LOAD CARDS */
 async function loadCards() {
-    try {
-        const response = await fetch("../js/cards.json");
-        const cards = await response.json();
-        displayCards(cards);
-    } catch (error) {
-        console.error("Error loading cards:", error);
-    }
+    const res = await fetch("../js/cards.json");
+    const cards = await res.json();
+    allCards = cards;
+    displayCards(cards);
 }
 
-const container = document.getElementById("cards-container");
-
-// Determine rarity (simple logic)
+/* RARITY */
 function getRarity(card) {
     if (card.attack >= 4) return "legendary";
     if (card.defense >= 4) return "epic";
     return "common";
 }
 
+/* DISPLAY */
 function displayCards(cards) {
+    const container = document.getElementById("cards-container");
     if (!container) return;
 
     container.innerHTML = "";
@@ -26,47 +25,64 @@ function displayCards(cards) {
     cards.forEach(card => {
         const rarity = getRarity(card);
 
-        const cardDiv = document.createElement("div");
-        cardDiv.classList.add("card", rarity);
+        const el = document.createElement("div");
+        el.className = `card ${rarity}`;
 
-        cardDiv.innerHTML = `
+        el.innerHTML = `
             <div class="card-inner">
-                
-                <!-- FRONT -->
                 <div class="card-front">
-                    <img src="../${card.image}" alt="${card.name}">
+                    <img src="../${card.image}">
                     <h3>${card.name}</h3>
                     <p>${card.role}</p>
                 </div>
-
-                <!-- BACK -->
                 <div class="card-back">
-                    <h3>${card.name}</h3>
-                    <p><strong>Attack:</strong> ${card.attack}</p>
-                    <p><strong>Defense:</strong> ${card.defense}</p>
+                    <p><strong>ATK:</strong> ${card.attack}</p>
+                    <p><strong>DEF:</strong> ${card.defense}</p>
                     <p>${card.rulesText}</p>
                 </div>
-
             </div>
         `;
 
-        // Flip on click
-        cardDiv.addEventListener("click", () => {
-            cardDiv.classList.toggle("flipped");
-        });
-
-        container.appendChild(cardDiv);
+        container.appendChild(el);
     });
 }
 
-// Angry Nano Mode 😈
-const toggleButton = document.getElementById("rage-toggle");
+/* PACK OPENING */
+function openPack() {
+    const container = document.getElementById("pack-results");
+    container.innerHTML = "";
 
-if (toggleButton) {
-    toggleButton.addEventListener("click", () => {
-        document.body.classList.toggle("rage-mode");
+    const shuffled = [...allCards].sort(() => 0.5 - Math.random());
+    const picks = shuffled.slice(0, 3);
+
+    picks.forEach(card => {
+        const rarity = getRarity(card);
+
+        const el = document.createElement("div");
+        el.className = `card ${rarity}`;
+
+        el.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front">
+                    <img src="../${card.image}">
+                    <h3>${card.name}</h3>
+                </div>
+                <div class="card-back">
+                    <p>${card.rulesText}</p>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(el);
     });
 }
 
-// Run
+/* EVENTS */
+document.getElementById("open-pack").onclick = openPack;
+
+document.getElementById("rage-toggle").onclick = () => {
+    document.body.classList.toggle("rage-mode");
+};
+
+/* INIT */
 loadCards();
