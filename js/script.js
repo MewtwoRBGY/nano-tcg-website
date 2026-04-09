@@ -2,7 +2,7 @@ let allCards = [];
 
 /* LOAD CARDS */
 async function loadCards() {
-    const res = await fetch("../js/cards.json");
+    const res = await fetch("js/cards.json");
     const cards = await res.json();
     allCards = cards;
     displayCards(cards);
